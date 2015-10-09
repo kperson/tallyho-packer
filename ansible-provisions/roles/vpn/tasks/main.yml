@@ -1,0 +1,26 @@
+---
+- name: install dns
+  apt: pkg=dnsmasq state=installed
+
+- name: copy vpn upstart
+  copy: src=vpn-upstart.txt dest=/etc/init/docker-vpn.conf
+
+# - name: create vpn data volumne
+#   shell: docker run --name tallypix-vpn -v /etc/openvpn busybox
+#   ignore_errors: yes
+#   sudo: yes
+#
+#
+# - name: setup vpn host
+#   shell: docker run --volumes-from tallypix-vpn --rm  kperson/docker-openvpn ovpn_genconfig -u udp://vpn.tallypix.com:1194
+#   ignore_errors: yes
+#   sudo: yes
+#
+# - name: setup vpn certificate authority
+#   shell: docker run --volumes-from tallypix-vpn --rm -it kperson/docker-openvpn ovpn_initpki
+#   ignore_errors: yes
+#   sudo: yes
+
+#sudo docker run --volumes-from tallypix-vpn --rm -it kperson/docker-openvpn easyrsa build-client-full kelton-laptop-tp nopass
+#sudo docker run --volumes-from tallypix-vpn --rm kperson/docker-openvpn ovpn_getclient kelton-laptop-tp > kelton-laptop-tp.ovpn
+#https://registry.hub.docker.com/u/kylemanna/openvpn/

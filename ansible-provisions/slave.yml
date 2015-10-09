@@ -1,0 +1,7 @@
+---
+- hosts: slave
+  sudo: yes
+  gather_facts: yes
+  roles:
+    - role: master_disable
+    - role: slave_enable

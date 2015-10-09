@@ -1,0 +1,23 @@
+---
+#add overrides
+- name: switch zookeeper to manual
+  copy: src=manual.txt dest=/etc/init/zookeeper.override
+
+- name: switch mesos-master to manual
+  copy: src=manual.txt dest=/etc/init/mesos-master.override
+
+- name: switch marathon to manual
+  copy: src=manual.txt dest=/etc/init/marathon.override
+
+#stop
+- name: stop mesos master
+  command: stop mesos-master
+  ignore_errors: yes
+
+- name: stop marathon
+  command: stop marathon
+  ignore_errors: yes
+
+- name: stop zookeeper
+  command: stop zookeeper
+  ignore_errors: yes

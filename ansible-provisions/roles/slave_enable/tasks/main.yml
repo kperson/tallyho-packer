@@ -1,0 +1,17 @@
+---
+#config
+- name: mesos slave ip
+  template: src=mesos-slave-ip.j2 dest=/etc/mesos-slave/ip
+
+- name: mesos slave hostname
+  template: src=mesos-slave-ip.j2 dest=/etc/mesos-slave/hostname
+
+#remove overrides
+- name: switch mesos-slave to automatic
+  command: rm /etc/init/mesos-slave.override
+  ignore_errors: yes
+
+#start
+- name: start mesos slave
+  command: start mesos-slave
+  ignore_errors: yes

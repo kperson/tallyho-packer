@@ -1,0 +1,101 @@
+{
+  "variables": {},
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "boot_command": [
+        "<esc><wait>",
+        "<esc><wait>",
+        "<enter><wait>",
+        "/install/vmlinuz",
+        " auto=true",
+        " priority=critical",
+        " initrd=/install/initrd.gz",
+        " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg",
+        " -- ",
+        "<enter>"
+      ],
+      "boot_wait": "10s",
+      "disk_size": 81920,
+      "guest_os_type": "Ubuntu_64",
+      "headless": true,
+      "http_directory": "http",
+      "iso_urls": [
+        "http://releases.ubuntu.com/14.04/ubuntu-14.04.3-server-amd64.iso"
+      ],
+      "iso_checksum_type": "md5",
+      "iso_checksum": "9e5fecc94b3925bededed0fdca1bd417",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_wait_timeout": "10000s",
+      "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
+      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+      "virtualbox_version_file": ".vbox_version",
+      "vm_name": "packer-ubuntu-14.04-amd64",
+      "vboxmanage": [
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--memory",
+          "512"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--cpus",
+          "2"
+        ]
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
+      "inline": [
+        "echo '%sudo    ALL=(ALL)  NOPASSWD:ALL' >> /etc/sudoers"
+      ]
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
+      "inline": [
+        "sleep 30",
+        "apt-add-repository ppa:rquillo/ansible",
+        "/usr/bin/apt-get update",
+        "/usr/bin/apt-get -y install ansible"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "mkdir -p /tmp/packer-provisioner-ansible-local",
+        "sudo mkdir -p /usr/tallyho",
+        "sudo chmod 777 /usr/tallyho"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "./ansible-provisions/",
+      "destination": "/tmp/packer-provisioner-ansible-local"
+    },
+    {
+      "type": "file",
+      "source": "./ansible-provisions",
+      "destination": "/usr/tallyho"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo chmod 755 /usr/tallyho"
+      ]
+    },
+    {
+      "type": "ansible-local",
+      "playbook_file": "ansible-provisions/base.yml",
+      "inventory_groups": "base"
+    }
+  ],
+  "post-processors": ["vagrant"]
+}

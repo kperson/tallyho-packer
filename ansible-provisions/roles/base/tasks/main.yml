@@ -1,0 +1,98 @@
+---
+- name: create install directory and lock directory
+  command: mkdir -p ~/.install/opt2
+
+- name: add hostname routing
+  shell: (echo -n '127.0.0.1 ' && cat /etc/hostname) >> /etc/hosts && touch ~/.install/opt2/host_name.txt  creates=~/.install/opt2/host_name.txt
+
+- name: apt-get update
+  shell: apt-get update -y
+
+- name: apt-get upgrade
+  shell: apt-get dist-upgrade -y
+
+- name: install python software properties
+  apt: pkg=python-software-properties state=installed
+
+- name: install software properties common
+  apt: pkg=software-properties-common state=installed
+
+- name: install haxproxy
+  shell: add-apt-repository -y ppa:vbernat/haproxy-1.5 && apt-get update && apt-get install -y haproxy
+
+- name: install java
+  shell: echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && add-apt-repository -y ppa:webupd8team/java && apt-get update && apt-get install -y oracle-java8-installer && rm -rf /var/lib/apt/lists/* && rm -rf /var/cache/oracle-jdk8-installer creates=/usr/bin/java
+
+#mesos repo setup
+- name: add key server script
+  copy: src=marathon-repo-setup dest=~/.install/marathon-repo-setup
+
+- name: make key server script executable
+  shell: chmod +x ~/.install/marathon-repo-setup
+
+- name: setup keyserver
+  shell: ./marathon-repo-setup chdir=~/.install
+
+- name: fix apt-get
+  shell: apt-get -f -y install
+
+- name: install curl
+  apt: pkg=curl state=installed
+
+- name: install docker (latest)
+  shell: curl -sSL https://get.docker.com/ | sh
+
+- name: add docker config
+  template: src=docker.j2 dest=/etc/default/docker
+  # notify: restart docker
+
+- name: add haproxy config
+  template: src=haproxy.j2 dest=/etc/default/haproxy
+
+- name: mkdir mararthon bridge directory
+  shell: mkdir -p /etc/haproxy-marathon-bridge
+
+#https://raw.githubusercontent.com/mesosphere/marathon/master/bin/haproxy-marathon-bridge dest=~/.install/haproxy-marathon-bridge
+#marathon service discovery
+- name: download marathon cron
+  copy: src=haproxy-marathon-bridge dest=~/.install/haproxy-marathon-bridge
+  notify: install cron
+
+- name: make cron executable
+  shell: chmod +x ~/.install/haproxy-marathon-bridge
+
+- cron: name="reconfig haproxy 10" job="sleep 10 && sudo /usr/local/bin/haproxy-marathon-bridge logged refresh_system_haproxy $(cat /etc/haproxy-marathon-bridge/marathons)"
+
+- cron: name="reconfig haproxy 20" job="sleep 20 && sudo /usr/local/bin/haproxy-marathon-bridge logged refresh_system_haproxy $(cat /etc/haproxy-marathon-bridge/marathons)"
+
+- cron: name="reconfig haproxy 30" job="sleep 30 && sudo /usr/local/bin/haproxy-marathon-bridge logged refresh_system_haproxy $(cat /etc/haproxy-marathon-bridge/marathons)"
+
+- cron: name="reconfig haproxy 40" job="sleep 40 && sudo /usr/local/bin/haproxy-marathon-bridge logged refresh_system_haproxy $(cat /etc/haproxy-marathon-bridge/marathons)"
+
+- cron: name="reconfig haproxy 50" job="sleep 50 && sudo /usr/local/bin/haproxy-marathon-bridge logged refresh_system_haproxy $(cat /etc/haproxy-marathon-bridge/marathons)"
+
+
+- name: install mesosphere
+  shell: apt-get install -y mesosphere
+
+# - name: install mesos
+#   apt: pkg=mesos state=installed
+
+- name: mesos docker containerizers
+  template: src=mesos-slave-containerizers.j2 dest=/etc/mesos-slave/containerizers
+
+#docker cleanup
+- cron: name="stop unsed docker containers" minute="30" hour="12" job="sudo docker ps -q |xargs sudo docker rm"
+
+- cron: name="clean docker" minute="0" hour="13" job="sudo docker images -q |xargs sudo docker rmi"
+
+#docker compose
+- name: install pip
+  apt: pkg=python-pip state=installed
+
+- name: install docker compose
+  command: pip install -U docker-compose==1.4.0
+
+#zookeeper ip 4
+- name: switch zookeeper to ip4 only
+  lineinfile: dest=/etc/zookeeper/conf/environment regexp=JAVA_OPTS= line=JAVA_OPTS="-Djava.net.preferIPv4Stack=true"

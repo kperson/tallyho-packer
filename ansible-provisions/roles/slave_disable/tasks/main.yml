@@ -1,0 +1,9 @@
+---
+#add overrides
+- name: switch mesos-slave to manual
+  copy: src=manual.txt dest=/etc/init/mesos-slave.override
+
+#stop
+- name: stop mesos slave
+  command: stop mesos-slave
+  ignore_errors: yes

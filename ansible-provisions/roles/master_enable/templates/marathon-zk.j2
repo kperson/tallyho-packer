@@ -1,0 +1,1 @@
+{% for hostname in groups['mesosmaster'] %}zk://{{ hostname }}:2181/marathon{% if not loop.last %},{% endif %}{% endfor %}

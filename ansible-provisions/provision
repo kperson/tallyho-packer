@@ -1,0 +1,6 @@
+#!/bin/sh
+
+ansible-playbook -i "$1" runtime.yml
+ansible-playbook -i "$1" master.yml
+ansible-playbook -i "$1" slave.yml
+ansible-playbook -i "$1" masterslave.yml

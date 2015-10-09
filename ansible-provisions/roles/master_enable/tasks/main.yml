@@ -1,0 +1,51 @@
+---
+#config
+- name: mesos master ip
+  template: src=mesos-master-ip.j2 dest=/etc/mesos-master/ip
+
+- name: mesos master hostname
+  template: src=mesos-master-ip.j2 dest=/etc/mesos-master/hostname
+
+- name: create zookeeper id file
+  template: src=zooid.j2 dest=/etc/zookeeper/conf/myid
+
+- name: create zookeeper cluster file
+  template: src=zoo.cfg.j2 dest=/etc/zookeeper/conf/zoo.cfg
+
+- name: add quorum
+  template: src=quorum.j2 dest=/etc/mesos-master/quorum
+
+- name: make zk marathon directory
+  command: mkdir -p /etc/marathon/conf
+
+- name: copy zk configuration
+  template: src=zookeeper-hosts.j2 dest=/etc/marathon/conf/master
+
+- name: create mararthon zookeeper list
+  template: src=marathon-zk.j2 dest=/etc/marathon/conf/zk
+
+#remove overrides
+- name: switch zookeeper to automatic
+  shell: rm /etc/init/zookeeper.override
+  ignore_errors: yes
+
+- name: switch mesos-master to automatic
+  shell: rm /etc/init/mesos-master.override
+  ignore_errors: yes
+
+- name: switch marathon to automatic
+  shell: rm /etc/init/marathon.override
+  ignore_errors: yes
+
+#start
+- name: start zookeeper
+  command: start zookeeper
+  ignore_errors: yes
+
+- name: start mesos master
+  command: start mesos-master
+  ignore_errors: yes
+
+- name: start marathon
+  command: start marathon
+  ignore_errors: yes

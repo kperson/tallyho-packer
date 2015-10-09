@@ -1,0 +1,15 @@
+description "Docker container for OpenVPN server"
+start on filesystem and started docker
+stop on runlevel [!2345]
+respawn
+
+script
+  docker kill vpn || true
+  docker rm vpn || true
+  docker run --name vpn --volumes-from tallypix-vpn -p 1194:1194/udp --cap-add=NET_ADMIN kperson/docker-openvpn
+end script
+
+pre-stop script
+  docker kill vpn
+  docker rm vpn || true
+end script

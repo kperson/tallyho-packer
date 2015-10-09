@@ -1,0 +1,10 @@
+---
+- hosts: vpn
+  gather_facts: yes
+  sudo: yes
+  vars:
+    vpn_host: vpn.tallypix.com
+    vpn_volume: ovpn-data
+  roles:
+    - role: base
+    - role: vpn

@@ -1,0 +1,6 @@
+---
+- hosts: runtime
+  sudo: yes
+  gather_facts: yes
+  roles:
+    - role: runtime
