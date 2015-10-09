@@ -39,13 +39,13 @@
 
 #start
 - name: start zookeeper
-  command: start zookeeper
+  service: name=zookeeper state=restarted
   ignore_errors: yes
 
 - name: start mesos master
-  command: start mesos-master
+  service: name=mesos-master state=restarted
   ignore_errors: yes
 
 - name: start marathon
-  command: start marathon
+  service: name=marathon state=restarted
   ignore_errors: yes

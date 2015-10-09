@@ -12,6 +12,6 @@
   ignore_errors: yes
 
 #start
-- name: start mesos slave
-  command: start mesos-slave
+- name: start mesos-slave
+  service: name=mesos-slave state=restarted
   ignore_errors: yes
