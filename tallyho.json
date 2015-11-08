@@ -30,6 +30,7 @@
       "ssh_port": 22,
       "ssh_wait_timeout": "10000s",
       "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
+      "guest_additions_mode": "upload",
       "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
       "virtualbox_version_file": ".vbox_version",
       "vm_name": "packer-ubuntu-14.04-amd64",
@@ -47,6 +48,19 @@
           "2"
         ]
       ]
+    },
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "subnet_id": "{{user `subnet_id`}}",
+      "vpc_id": "{{user `vpc_id`}}",
+      "associate_public_ip_address": true,
+      "region": "us-east-1",
+      "source_ami": "ami-d05e75b8",
+      "instance_type": "t2.medium",
+      "ssh_username": "ubuntu",
+      "ami_name": "tallyho-{{timestamp}}"
     }
   ],
   "provisioners": [

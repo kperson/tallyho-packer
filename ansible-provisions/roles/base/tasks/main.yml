@@ -20,6 +20,10 @@
 - name: install haxproxy
   shell: add-apt-repository -y ppa:vbernat/haproxy-1.5 && apt-get update && apt-get install -y haproxy
 
+- name: start haproxy
+  service: name=haproxy state=stopped
+  ignore_errors: true
+
 - name: install java
   shell: echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && add-apt-repository -y ppa:webupd8team/java && apt-get update && apt-get install -y oracle-java8-installer && rm -rf /var/lib/apt/lists/* && rm -rf /var/cache/oracle-jdk8-installer creates=/usr/bin/java
 
@@ -61,17 +65,6 @@
 - name: make cron executable
   shell: chmod +x ~/.install/haproxy-marathon-bridge
 
-- cron: name="reconfig haproxy 10" job="sleep 10 && sudo /usr/local/bin/haproxy-marathon-bridge logged refresh_system_haproxy $(cat /etc/haproxy-marathon-bridge/marathons)"
-
-- cron: name="reconfig haproxy 20" job="sleep 20 && sudo /usr/local/bin/haproxy-marathon-bridge logged refresh_system_haproxy $(cat /etc/haproxy-marathon-bridge/marathons)"
-
-- cron: name="reconfig haproxy 30" job="sleep 30 && sudo /usr/local/bin/haproxy-marathon-bridge logged refresh_system_haproxy $(cat /etc/haproxy-marathon-bridge/marathons)"
-
-- cron: name="reconfig haproxy 40" job="sleep 40 && sudo /usr/local/bin/haproxy-marathon-bridge logged refresh_system_haproxy $(cat /etc/haproxy-marathon-bridge/marathons)"
-
-- cron: name="reconfig haproxy 50" job="sleep 50 && sudo /usr/local/bin/haproxy-marathon-bridge logged refresh_system_haproxy $(cat /etc/haproxy-marathon-bridge/marathons)"
-
-
 - name: install mesosphere
   shell: apt-get install -y mesosphere
 
@@ -81,10 +74,6 @@
 - name: mesos docker containerizers
   template: src=mesos-slave-containerizers.j2 dest=/etc/mesos-slave/containerizers
 
-#docker cleanup
-- cron: name="stop unsed docker containers" minute="30" hour="12" job="sudo docker ps -q |xargs sudo docker rm"
-
-- cron: name="clean docker" minute="0" hour="13" job="sudo docker images -q |xargs sudo docker rmi"
 
 #docker compose
 - name: install pip
@@ -96,3 +85,6 @@
 #zookeeper ip 4
 - name: switch zookeeper to ip4 only
   lineinfile: dest=/etc/zookeeper/conf/environment regexp=JAVA_OPTS= line=JAVA_OPTS="-Djava.net.preferIPv4Stack=true"
+
+- name: install vim
+  apt: pkg=vim state=installed

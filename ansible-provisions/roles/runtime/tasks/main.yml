@@ -8,3 +8,19 @@
 - name: start haproxy
   service: name=haproxy state=started
   ignore_errors: true
+
+#docker cleanup
+- cron: name="stop unsed docker containers" minute="30" hour="12" job="sudo docker ps -q |xargs sudo docker rm"
+
+- cron: name="clean docker" minute="0" hour="13" job="sudo docker images -q |xargs sudo docker rmi"
+
+#service discovery
+- cron: name="reconfig haproxy 10" job="sleep 10 && sudo /usr/local/bin/haproxy-marathon-bridge logged refresh_system_haproxy $(cat /etc/haproxy-marathon-bridge/marathons)"
+
+- cron: name="reconfig haproxy 20" job="sleep 20 && sudo /usr/local/bin/haproxy-marathon-bridge logged refresh_system_haproxy $(cat /etc/haproxy-marathon-bridge/marathons)"
+
+- cron: name="reconfig haproxy 30" job="sleep 30 && sudo /usr/local/bin/haproxy-marathon-bridge logged refresh_system_haproxy $(cat /etc/haproxy-marathon-bridge/marathons)"
+
+- cron: name="reconfig haproxy 40" job="sleep 40 && sudo /usr/local/bin/haproxy-marathon-bridge logged refresh_system_haproxy $(cat /etc/haproxy-marathon-bridge/marathons)"
+
+- cron: name="reconfig haproxy 50" job="sleep 50 && sudo /usr/local/bin/haproxy-marathon-bridge logged refresh_system_haproxy $(cat /etc/haproxy-marathon-bridge/marathons)"
