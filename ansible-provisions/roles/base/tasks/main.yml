@@ -43,12 +43,35 @@
 - name: install curl
   apt: pkg=curl state=installed
 
+- name: add ubuntu keyserver
+  shell: apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+
+- name: add docker to apt-get source
+  shell: sh -c "echo deb https://apt.dockerproject.org/repo ubuntu-trusty main > /etc/apt/sources.list.d/docker.list"
+
+- name: update apt-get
+  shell: apt-get update -y
+
+- name: purge old docker
+  shell: apt-get purge lxc-docker -y
+
+- name: verify docker upgrade cache policy
+  shell: apt-cache policy docker-engine
+
+- name: update apt-get
+  shell: apt-get update -y
+
+- name: install linux-image-extra
+  shell: apt-get install linux-image-extra-$(uname -r) -y
+
+- name: update apt-get
+  shell: apt-get update -y
+
 - name: install docker (latest)
-  shell: curl -sSL https://get.docker.com/ | sh
+  shell: apt-get install docker-engine -y
 
 - name: add docker config
   template: src=docker.j2 dest=/etc/default/docker
-  # notify: restart docker
 
 - name: add haproxy config
   template: src=haproxy.j2 dest=/etc/default/haproxy
@@ -80,7 +103,8 @@
   apt: pkg=python-pip state=installed
 
 - name: install docker compose
-  command: pip install -U docker-compose==1.4.0
+  #command: pip install -U docker-compose==1.4.0
+  command: pip install -U docker-compose==1.5.2
 
 #zookeeper ip 4
 - name: switch zookeeper to ip4 only
