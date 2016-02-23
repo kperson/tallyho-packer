@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd /usr/tallyho/ansible-provisions
+awsdiscovery /etc/tallyho/aws-key /etc/tallyho/aws-secret
